@@ -1,1 +1,74 @@
+// Datos de ejemplo para la malla
+const malla = [
+  {
+    semestre: "Semestre 1",
+    ramos: [
+      { nombre: "Química General", codigo: "QG", prerequisitos: [] },
+      { nombre: "Matemáticas I", codigo: "M1", prerequisitos: [] },
+      { nombre: "Introducción a la Química", codigo: "IQ", prerequisitos: [] },
+    ],
+  },
+  {
+    semestre: "Semestre 2",
+    ramos: [
+      { nombre: "Química Orgánica", codigo: "QO", prerequisitos: ["QG"] },
+      { nombre: "Matemáticas II", codigo: "M2", prerequisitos: ["M1"] },
+      { nombre: "Física I", codigo: "F1", prerequisitos: [] },
+    ],
+  },
+];
+
+// Estado para saber qué ramos están aprobados
+let ramosAprobados = new Set();
+
+// Función para verificar si se puede desbloquear un ramo
+function estaBloqueado(ramo) {
+  return ramo.prerequisitos.some((pre) => !ramosAprobados.has(pre));
+}
+
+// Función para renderizar la malla
+function renderizarMalla() {
+  const container = document.getElementById("malla-container");
+  container.innerHTML = "";
+
+  malla.forEach(({ semestre, ramos }) => {
+    const divSemestre = document.createElement("div");
+    divSemestre.classList.add("semestre");
+
+    const tituloSemestre = document.createElement("h2");
+    tituloSemestre.textContent = semestre;
+    divSemestre.appendChild(tituloSemestre);
+
+    ramos.forEach((ramo) => {
+      const divRamo = document.createElement("div");
+      divRamo.classList.add("ramo");
+      divRamo.textContent = ramo.nombre;
+      divRamo.dataset.codigo = ramo.codigo;
+
+      if (estaBloqueado(ramo)) {
+        divRamo.classList.add("bloqueado");
+      } else if (ramosAprobados.has(ramo.codigo)) {
+        divRamo.classList.add("aprobado");
+      }
+
+      divRamo.addEventListener("click", () => {
+        if (divRamo.classList.contains("bloqueado")) return;
+
+        if (ramosAprobados.has(ramo.codigo)) {
+          ramosAprobados.delete(ramo.codigo);
+        } else {
+          ramosAprobados.add(ramo.codigo);
+        }
+        renderizarMalla();
+      });
+
+      divSemestre.appendChild(divRamo);
+    });
+
+    container.appendChild(divSemestre);
+  });
+}
+
+// Renderizar la malla al cargar la página
+renderizarMalla();
 
